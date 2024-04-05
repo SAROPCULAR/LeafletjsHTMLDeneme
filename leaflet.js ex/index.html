@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaflet Example</title>
+    <!-- leaflet css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- leaflet fullscreen css -->
+    <link rel="stylesheet" href="css/Control.FullScreen.css" />
+    <!-- leaflet measure css -->
+    <link rel="stylesheet" href="css/leaflet-measure.css">
+    <!-- leaflet search bar css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+</body>
+</html>
+<!-- leaflet js -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- leaflet fullscreen js -->
+<script src="js/Control.FullScreen.js"></script>
+<!-- leaflet measure js -->
+<script src="js/leaflet-measure.js"></script>
+<!-- leaflet search bar js -->
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="dist/leaflet.easyPrint.js"></script>
+<script>
+    // map initialization
+    var map = L.map('map', {
+        fullscreenControl: true,
+        fullscreenControlOptions: {
+            position: 'topleft'
+        }
+    }).setView([51.505, -0.09], 13);
+
+    // OpenStreetMap layer
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // adding marker
+    L.marker([51.5, -0.09]).addTo(map)
+        .bindPopup('A pretty CSS popup.<br> Easily customizable.')
+        .openPopup();
+
+    // add map scale
+    L.control.scale({position: 'bottomright'}).addTo(map);
+
+    //add map search box
+    L.Control.geocoder().addTo(map);
+
+    //add map measurement
+    L.Measure = {
+        linearMeasurement: "Mesafe ölçme",
+        areaMeasurement: "Alan ölçme",
+        start: "Başlangıç",
+        meter: "m",
+        kilometer: "km",
+        squareMeter: "m²",
+        squareKilometers: "km²",
+    };
+    var measure = L.control.measure({}).addTo(map);
+
+
+    L.easyPrint({
+        title: 'My awesome print button',
+        position: 'bottomleft',
+        elementsToHide: 'p, h2'
+    }).addTo(map);
+</script>
+
