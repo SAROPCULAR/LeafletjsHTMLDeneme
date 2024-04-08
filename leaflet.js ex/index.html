@@ -18,7 +18,7 @@
         }
         #map {
             width: 100%;
-            height: 100vh;
+            height: 70vh;
         }
     </style>
 </head>
@@ -28,13 +28,18 @@
 </html>
 <!-- leaflet js -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- leaflet fullscreen js -->
 <script src="js/Control.FullScreen.js"></script>
 <!-- leaflet measure js -->
 <script src="js/leaflet-measure.js"></script>
 <!-- leaflet search bar js -->
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-<script src="dist/leaflet.easyPrint.js"></script>
+<!-- leaflet print map js -->
+<script src="./lib/leaflet.browser.print.min.js"></script>
+
+
+
 <script>
     // map initialization
     var map = L.map('map', {
@@ -50,12 +55,43 @@
     }).addTo(map);
 
     // adding marker
-    L.marker([51.5, -0.09]).addTo(map)
+    var singleMarker = L.marker([51.5, -0.09]).addTo(map)
         .bindPopup('A pretty CSS popup.<br> Easily customizable.')
         .openPopup();
 
     // add map scale
     L.control.scale({position: 'bottomright'}).addTo(map);
+
+
+    //add layer control
+    // Google Map Layer
+
+    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+    });
+    googleStreets.addTo(map);
+
+    // Satelite Layer
+    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+    });
+    googleSat.addTo(map);
+
+    var baseLayers = {
+        "Satellite":googleSat,
+        "Google Map":googleStreets,
+        "OpenStreetMap": osm,
+    };
+
+    var overlays = {
+        "Marker": singleMarker
+    };
+
+    L.control.layers(baseLayers, overlays).addTo(map);
+
+
 
     //add map search box
     L.Control.geocoder().addTo(map);
@@ -72,11 +108,51 @@
     };
     var measure = L.control.measure({}).addTo(map);
 
+    //add print map
+    L.control.browserPrint({position: 'topright', title: 'Print ...'}).addTo(map);
 
-    L.easyPrint({
-        title: 'My awesome print button',
-        position: 'bottomleft',
-        elementsToHide: 'p, h2'
-    }).addTo(map);
+
+    //add live location
+    if(!navigator.geolocation) {
+        console.log("Your browser doesn't support geolocation feature!")
+    } else {
+        setInterval(() => {
+            navigator.geolocation.getCurrentPosition(getPosition)
+        }, 5000);
+    }
+
+    var marker, circle;
+
+    function getPosition(position){
+        // console.log(position)
+        var lat = position.coords.latitude
+        var long = position.coords.longitude
+        var accuracy = position.coords.accuracy
+
+        if(marker) {
+            map.removeLayer(marker)
+        }
+
+        if(circle) {
+            map.removeLayer(circle)
+        }
+
+        marker = L.marker([lat, long])
+        circle = L.circle([lat, long], {radius: accuracy})
+
+        var featureGroup = L.featureGroup([marker, circle]).addTo(map)
+
+        //map.fitBounds(featureGroup.getBounds())
+
+        console.log("Your coordinate is: Lat: "+ lat +" Long: "+ long+ " Accuracy: "+ accuracy)
+    }
+
+
+
+
+
+
+
+
 </script>
 
